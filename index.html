@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks Event Schedule</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .search-container input[type="text"] {
+            width: 70%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .search-container input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .talk-card {
+            background-color: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .talk-card:hover {
+            transform: translateY(-5px);
+        }
+        .talk-card.lunch-break {
+            background-color: #ffe0b2;
+            border-color: #ffcc80;
+            text-align: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e65100;
+        }
+        .talk-card h3 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 1.5em;
+        }
+        .talk-card p {
+            margin: 5px 0;
+            flex-grow: 1;
+        }
+        .talk-card .time {
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .talk-card .speakers {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .talk-card .categories {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .talk-card .category-tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .talk-card.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tech Talks Event Schedule</h1>
+        <p style="text-align: center; font-size: 1.1em; color: #555;">Join us for a day of insightful technical discussions!</p>
+
+        <div class="search-container">
+            <input type="text" id="categorySearch" placeholder="Search by category (e.g., AI, Web Dev)...">
+        </div>
+
+        <h2>Today's Schedule</h2>
+        <div class="schedule" id="eventSchedule">
+            <!-- Schedule will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const talksData = [
+            {
+                time: "10:00 AM - 11:00 AM",
+                title: "The Future of Serverless Architectures",
+                speakers: "Dr. Anya Sharma, John Doe",
+                categories: ["Cloud", "Serverless", "Architecture"],
+                duration: "1 hour",
+                description: "Explore the cutting-edge trends in serverless computing, from FaaS to serverless containers, and how they are reshaping modern application development."
+            },
+            {
+                time: "11:10 AM - 12:10 PM",
+                title: "Advanced JavaScript Patterns for Scalable Apps",
+                speakers: "Maria Rodriguez",
+                categories: ["JavaScript", "Web Dev", "Software Engineering"],
+                duration: "1 hour",
+                description: "Dive deep into design patterns and best practices that enable building maintainable and scalable JavaScript applications."
+            },
+            {
+                time: "12:20 PM - 01:20 PM",
+                title: "Lunch Break",
+                isBreak: true
+            },
+            {
+                time: "01:30 PM - 02:30 PM",
+                title: "Demystifying Machine Learning Pipelines",
+                speakers: "Professor Li Wei",
+                categories: ["AI", "Machine Learning", "Data Science"],
+                duration: "1 hour",
+                description: "A practical guide to building, deploying, and managing robust machine learning pipelines using open-source tools."
+            },
+            {
+                time: "02:40 PM - 03:40 PM",
+                title: "Container Security in a Multi-Cloud World",
+                speakers: "Sarah Jenkins",
+                categories: ["Security", "Cloud", "DevOps"],
+                duration: "1 hour",
+                description: "Understand the challenges and solutions for securing containerized applications across diverse cloud environments."
+            },
+            {
+                time: "03:50 PM - 04:50 PM",
+                title: "Introduction to WebAssembly for Frontend Developers",
+                speakers: "Alex Chen",
+                categories: ["Web Dev", "Performance", "Frontend"],
+                duration: "1 hour",
+                description: "Discover how WebAssembly can boost the performance of web applications and its growing ecosystem for frontend development."
+            },
+            {
+                time: "05:00 PM - 06:00 PM",
+                title: "Ethical AI: Building Responsible Systems",
+                speakers: "Dr. Emily Clark, David Green",
+                categories: ["AI", "Ethics", "Responsible Tech"],
+                duration: "1 hour",
+                description: "Discuss the critical aspects of ethical AI development, focusing on bias, fairness, transparency, and accountability."
+            }
+        ];
+
+        function renderSchedule(talksToRender) {
+            const scheduleContainer = document.getElementById('eventSchedule');
+            scheduleContainer.innerHTML = ''; // Clear previous content
+
+            talksToRender.forEach(talk => {
+                const talkCard = document.createElement('div');
+                talkCard.classList.add('talk-card');
+
+                if (talk.isBreak) {
+                    talkCard.classList.add('lunch-break');
+                    talkCard.innerHTML = `
+                        <p class="time">${talk.time}</p>
+                        <h3>${talk.title}</h3>
+                    `;
+                } else {
+                    const categoryTags = talk.categories.map(cat => `<span class="category-tag">${cat}</span>`).join('');
+                    talkCard.innerHTML = `
+                        <p class="time">${talk.time}</p>
+                        <h3>${talk.title}</h3>
+                        <p class="speakers">Speaker(s): ${talk.speakers}</p>
+                        <p class="description">${talk.description}</p>
+                        <p class="categories">Categories: ${categoryTags}</p>
+                    `;
+                }
+                scheduleContainer.appendChild(talkCard);
+            });
+        }
+
+        // Initial render of the full schedule
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSchedule(talksData);
+
+            const searchInput = document.getElementById('categorySearch');
+            searchInput.addEventListener('keyup', (event) => {
+                const searchTerm = event.target.value.toLowerCase().trim();
+                if (searchTerm === '') {
+                    renderSchedule(talksData); // Show all if search box is empty
+                    return;
+                }
+
+                const filteredTalks = talksData.filter(talk => {
+                    if (talk.isBreak) return false; // Don't filter breaks
+                    return talk.categories.some(category => category.toLowerCase().includes(searchTerm));
+                });
+                renderSchedule(filteredTalks);
+            });
+        });
+    </script>
+</body>
+</html>
